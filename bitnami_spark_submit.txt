@@ -1,0 +1,3 @@
+
+./bin/spark-submit --deploy-mode=client ../spark/scripts/my_example.py
+./bin/spark-submit --deploy-mode=client ../spark/scripts/my_example_qb.py
