@@ -29,10 +29,16 @@ $SPARK_HOME/bin/spark-shell \
   .load("src/test/resources/ecommerce100K_2019_Oct.csv")
   ```
 
-**Submit job**
-  ...
+**Submit joobs**
+***Submit long running job***
 
-  $SPARK_HOME/bin/spark-submit --master local $SPARK_MY_SCRIPTS/retail_select.py
-
+  ```
   $SPARK_HOME/bin/spark-submit --master local $SPARK_MY_SCRIPTS/retail_select_from_parquet.py
-  ...
+  ```
+
+  ***Submit select job***
+
+  ```
+  $SPARK_HOME/bin/spark-submit --master local $SPARK_MY_SCRIPTS/retail_select.py
+  ```
+  
