@@ -24,6 +24,7 @@ RUN mkdir -p /home/spark/data/output/parquet/cart_events;
 RUN mkdir -p /home/spark/data/output/parquet/retail;    
 
 ENV SPARK_MY_INPUT_DATA=/home/spark/data/input
+ENV SPARK_MY_OUTPUT_DATA=/home/spark/data/output
 ENV SPARK_MY_SCRIPTS=/home/spark/scripts
 
 #RUN wget --no-cache --timeout=3000 https://raw.githubusercontent.com/databricks/Spark-The-Definitive-Guide/refs/heads/master/data/retail-data/all/online-retail-dataset.csv -P $SPARK_MY_INPUT_DATA/csv/retail

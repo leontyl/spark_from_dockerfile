@@ -31,7 +31,8 @@ $SPARK_HOME/bin/spark-shell \
 
 **Submit job**
   ...
-  $SPARK_HOME/bin/spark-submit --master local $SPARK_MY_SCRIPTS/retail_create.py
-  $SPARK_HOME/bin/spark-submit --master local $SPARK_MY_SCRIPTS/retail_stream_read.py
+
   $SPARK_HOME/bin/spark-submit --master local $SPARK_MY_SCRIPTS/retail_select.py
+
+  $SPARK_HOME/bin/spark-submit --master local $SPARK_MY_SCRIPTS/retail_select_from_parquet.py
   ...

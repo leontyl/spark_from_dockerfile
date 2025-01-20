@@ -1,38 +1,61 @@
+import os
 from pyspark.sql import SparkSession
-from delta.tables import DeltaTable
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, DoubleType, TimestampType
 
-# Step 1: Initialize SparkSession with Delta Lake support
+# Define schema
+# Define schema
+schema = StructType([
+    StructField("InvoiceNo", StringType(), True),
+    StructField("StockCode", StringType(), True),
+    StructField("Description", StringType(), True),
+    StructField("Quantity", IntegerType(), True),
+    StructField("InvoiceDate", TimestampType(), True),  # We'll parse date as timestamp
+    StructField("UnitPrice", DoubleType(), True),
+    StructField("CustomerID", IntegerType(), True),
+    StructField("Country", StringType(), True)
+])
+
+# Initialize SparkSession with Delta Lake support
 spark = SparkSession.builder \
-    .appName("CSV to Delta") \
+    .appName("CSV to Parquet") \
     .config("spark.sql.extensions", "io.delta.sql.DeltaSparkSessionExtension") \
     .config("spark.sql.catalog.spark_catalog", "org.apache.spark.sql.delta.catalog.DeltaCatalog") \
     .getOrCreate()
 
-# Step 2: Define paths
-csv_input_path = "path/to/your/csv/files"  # Input folder containing CSV files
-delta_output_path = "path/to/delta/output"  # Output folder for Delta Lake table
-checkpoint_path = "path/to/checkpoint"  # Checkpoint folder for streaming
+# Retrieve environment variables for input and output paths
+input_base_path = os.environ.get("SPARK_MY_INPUT_DATA")
+output_base_path = os.environ.get("SPARK_MY_OUTPUT_DATA")
 
-# Step 3: Read CSV files as a streaming DataFrame
+# Validate environment variables
+if not input_base_path:
+    raise EnvironmentError("Environment variable SPARK_MY_INPUT_DATA is not set")
+if not output_base_path:
+    raise EnvironmentError("Environment variable SPARK_MY_OUTPUT_DATA is not set")
+
+# Define paths using the environment variables
+csv_input_path = os.path.join(input_base_path, "csv/retail")
+parquet_output_path = os.path.join(output_base_path, "parquet/retail")
+checkpoint_path = os.path.join(output_base_path, "checkpoint/retail")
+
+# Read CSV files as a streaming DataFrame
 csv_stream_df = spark.readStream \
     .option("header", "true") \
+    .schema(schema) \
     .option("inferSchema", "true") \
     .csv(csv_input_path)
 
-# Step 4: Write the data to Delta format
+# Write the data to Parquet format
 query = csv_stream_df.writeStream \
-    .format("delta") \
+    .format("parquet") \
     .outputMode("append") \
     .option("checkpointLocation", checkpoint_path) \
-    .start(delta_output_path)
+    .start(parquet_output_path)
 
-# Step 5: Wait for the stream to finish (for production, this would run indefinitely)
-query.awaitTermination()
-
-# Step 6: Query Delta Table (Optional, for testing)
-# Uncomment below if you want to read and inspect the Delta table after the script runs
-# delta_table = DeltaTable.forPath(spark, delta_output_path)
-# delta_table.toDF().show()
-
-# Stop the Spark session (Optional)
-# spark.stop()
+# Graceful termination with error handling
+try:
+    query.awaitTermination()
+except Exception as e:
+    print(f"Streaming query failed: {e}")
+    query.stop()
+    spark.stop()
+    raise
