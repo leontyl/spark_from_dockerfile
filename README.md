@@ -30,6 +30,7 @@ $SPARK_HOME/bin/spark-shell \
   ```
 
 **Submit joobs**
+<br>
 ***Submit long running job***
 
   ```
